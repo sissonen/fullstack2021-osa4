@@ -1,7 +1,6 @@
+const app = require('./app')
 const http = require('http')
-const express = require('express')
-const app = express()
-const cors = require('cors')
+const config = require('./utils/config')
 const mongoose = require('mongoose')
 
 const blogSchema = mongoose.Schema({
@@ -12,12 +11,6 @@ const blogSchema = mongoose.Schema({
 })
 
 const Blog = mongoose.model('Blog', blogSchema)
-
-const mongoUrl = 'mongodb+srv://fullstack:fullstack@fullstack2021.xr09f.mongodb.net/blogilista?retryWrites=true&w=majority'
-mongoose.connect(mongoUrl)
-
-app.use(cors())
-app.use(express.json())
 
 app.get('/api/blogs', (request, response) => {
   Blog
@@ -37,7 +30,7 @@ app.post('/api/blogs', (request, response) => {
     })
 })
 
-const PORT = 3003
+const PORT = config.PORT
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
