@@ -21,4 +21,19 @@ const favoriteBlog = (blogs) => {
   return blogs[0]
 }
 
-module.exports = { dummy, totalLikes, favoriteBlog }
+const mostBlogs = (blogs) => {
+  const reducer = (arr, item) => {
+    return arr.concat(item.author)
+  }
+  let blogAuthors = blogs.reduce(reducer, [])
+  let blogsUniqAuthors = [ ... new Set(blogAuthors)]
+  let blogsCount = []
+  blogsUniqAuthors.forEach(
+    blogAuthor => 
+      blogsCount = blogsCount.concat({author: blogAuthor, count: blogs.filter(blog => blog.author === blogAuthor).length})
+  )
+  blogsCount.sort((a, b) => {return b.count - a.count})
+  return blogsCount[0]
+}
+
+module.exports = { dummy, totalLikes, favoriteBlog, mostBlogs }
