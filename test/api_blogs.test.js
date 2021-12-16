@@ -32,9 +32,9 @@ test('id is defined', async () => {
 test('blog addition', async () => {
   
   const testEntry = {
-    author: 'Test',
-    title: 'Test',
-    url: 'test.com',
+    author: 'Test 1',
+    title: 'Test 1',
+    url: 'test1.com',
     likes: 1
   }
 
@@ -50,6 +50,21 @@ test('blog addition', async () => {
   const authors = response.body.map(blog => blog.author)
   expect(authors).toContain(testEntry.author)
 
+})
+
+test('undefined likes', async () => {
+  const testEntry = {
+    author: 'Test 2',
+    title: 'Test 2',
+    url: 'test2.com'
+  }
+  const response = await api
+    .post('/api/blogs')
+    .send(testEntry)
+    .expect(201)
+  
+  expect(response.body.likes).toBe(0)
+  
 })
 
 afterAll(() => {
