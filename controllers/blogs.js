@@ -7,10 +7,14 @@ blogsRouter.get('/', async (request, response) => {
 })
 
 blogsRouter.post('/', async (request, response) => {
-  const blog = new Blog(request.body)
+  if (typeof request.body.title === 'undefined' && typeof request.body.url === 'undefined') {
+    response.status(400).end()
+  } else {
+    const blog = new Blog(request.body)
 
-  const result = await blog.save()
-  response.status(201).json(result)
+    const result = await blog.save()
+    response.status(201).json(result)
+  }
 })
 
 module.exports = blogsRouter

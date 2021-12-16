@@ -53,11 +53,13 @@ test('blog addition', async () => {
 })
 
 test('undefined likes', async () => {
+  
   const testEntry = {
     author: 'Test 2',
     title: 'Test 2',
     url: 'test2.com'
   }
+  
   const response = await api
     .post('/api/blogs')
     .send(testEntry)
@@ -65,6 +67,20 @@ test('undefined likes', async () => {
   
   expect(response.body.likes).toBe(0)
   
+})
+
+test('malformed entry', async () => {
+  
+  const testEntry = {
+    author: 'Test 3',
+    likes: 1
+  }
+  
+  await api
+    .post('/api/blogs')
+    .send(testEntry)
+    .expect(400)
+
 })
 
 afterAll(() => {
