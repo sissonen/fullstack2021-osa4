@@ -4,9 +4,9 @@
   "description": "Blogilista-sovellus",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js",
-    "test": "jest --verbose"
+    "start": "NODE_ENV=prod node index.js",
+    "dev": "NODE_ENV=dev nodemon index.js",
+    "test": "NODE_ENV=test jest --verbose --runInBand"
   },
   "repository": {
     "type": "git",
@@ -27,9 +27,7 @@
   },
   "devDependencies": {
     "jest": "^27.4.5",
-    "nodemon": "^2.0.15"
-  },
-  "jest":  {
-    "testEnvironment": "node"
+    "nodemon": "^2.0.15",
+    "supertest": "^6.1.6"
   }
 }
