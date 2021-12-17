@@ -102,6 +102,26 @@ test('delete entry', async () => {
 
 })
 
+test('modify entry', async () => {
+
+  const idToTest = helper.testBlogs[0]._id
+
+  const testEntry = {
+    author: 'Test 4',
+    title: 'Test 4',
+    url: 'test4.com',
+    likes: 1234
+  }
+
+  const result = await api
+    .put('/api/blogs/' + idToTest)
+    .send(testEntry)
+  
+  expect(result.body.author).toBe(testEntry.author)
+  expect(result.body.likes).toBe(testEntry.likes)
+
+})
+
 afterAll(() => {
   mongoose.connection.close()
 })
