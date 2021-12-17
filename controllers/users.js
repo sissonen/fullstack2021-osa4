@@ -9,6 +9,9 @@ usersRouter.get('/', async (request, response) => {
 
 usersRouter.post('/', async (request, response) => {
   
+  if (request.body.password.length < 3) {
+    return response.status(400).json({ error: 'Password needs to be at least 3 characters long.' })
+  }
   const passHash = await bcrypt.hash(request.body.password, 10)
   const user = new User({
     username: request.body.username,
@@ -16,8 +19,16 @@ usersRouter.post('/', async (request, response) => {
     passwordHash: passHash
   })
 
-  const result = await user.save()
-  response.status(201).json(result)
+  try {
+    const result = await user.save()
+    response.status(201).json(result)
+  } catch (exception) {
+    if (!response.headersSent) {
+      response.status(400).json({ error: 'Failed to save user: ' + exception })
+    } else {
+      console.log(exception)
+    }
+  }
 })
 
 /*blogsRouter.delete('/:id', async (request, response) => {
