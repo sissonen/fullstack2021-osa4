@@ -83,6 +83,25 @@ test('malformed entry', async () => {
 
 })
 
+test('delete entry', async () => {
+  
+  const blogsInDbStart = await api.get('/api/blogs')
+  
+  const idToTest = blogsInDbStart.body[0].id
+
+  await api
+    .delete('/api/blogs/' + idToTest)
+    .expect(204)
+  
+  const blogsInDbEnd = await api
+    .get('/api/blogs')
+
+  expect(blogsInDbEnd.body).toHaveLength(blogsInDbStart.body.length - 1)
+  const blogIds = blogsInDbEnd.body.map(blog => blog.id)
+  expect(blogIds).not.toContain(idToTest)
+
+})
+
 afterAll(() => {
   mongoose.connection.close()
 })
