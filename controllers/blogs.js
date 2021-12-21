@@ -1,6 +1,17 @@
 const blogsRouter = require('express').Router()
+const jwt = require('jsonwebtoken')
+
 const Blog = require('../models/blog')
 const User = require('../models/user')
+const config = require('../utils/config')
+
+const getToken = request => {
+  const auth = request.get('authorization')
+  if (auth && auth.toLowerCase().startsWith('bearer ')) {
+    return auth.substring(7)
+  }
+  return null
+}
 
 blogsRouter.get('/', async (request, response) => {
   const blogs = await Blog.find({}).populate('user', { username: 1, name: 1 })
@@ -9,12 +20,20 @@ blogsRouter.get('/', async (request, response) => {
 
 blogsRouter.post('/', async (request, response) => {
   
-  const randUser = await User.find({})
-  if (randUser[0] === 'undefined') {
-    return response.status(400).json({ error: 'No user defined' })
+  const token = getToken(request)
+  if (!token) {
+    return response.status(401).json({ error: 'Token is missing' })
   }
-  const user = randUser[0]
-  const userId = randUser[0].id
+  const tokenDecoded = jwt.verify(token, config.SECRET)
+  if (!tokenDecoded.id) {
+    return response.status(401).json({ error: 'Token is invalid' })
+  }
+  const user = await User.findById(tokenDecoded.id)
+  const userId = tokenDecoded.id
+
+  if (!user) {
+    return response.status(401).json({ error: 'No user matching token found' })
+  }
   
   if (typeof request.body.title === 'undefined' && typeof request.body.url === 'undefined') {
 
