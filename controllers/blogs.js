@@ -5,6 +5,36 @@ const Blog = require('../models/blog')
 const User = require('../models/user')
 const config = require('../utils/config')
 
+const verifyUser = async (request, response) => {
+
+  if (!request.token) {
+    response.status(401).json({ error: 'Token is missing' })
+    return null
+  }
+  
+  let tokenDecoded
+  try {
+    tokenDecoded = jwt.verify(request.token, config.SECRET)
+  } catch (exception) {
+    response.status(401).json({ error: 'Token verification failed' })
+    return null
+  }
+  if (!tokenDecoded.id) {
+    response.status(401).json({ error: 'Token is invalid' })
+    return null
+  }
+  
+  const user = await User.findById(tokenDecoded.id)
+
+  if (!user) {
+    response.status(401).json({ error: 'No user matching token found' })
+    return null
+  }
+
+  return user
+  
+}
+
 blogsRouter.get('/', async (request, response) => {
   const blogs = await Blog.find({}).populate('user', { username: 1, name: 1 })
   response.json(blogs)
@@ -12,20 +42,14 @@ blogsRouter.get('/', async (request, response) => {
 
 blogsRouter.post('/', async (request, response) => {
   
-  if (!request.token) {
-    return response.status(401).json({ error: 'Token is missing' })
-  }
-  const tokenDecoded = jwt.verify(request.token, config.SECRET)
-  if (!tokenDecoded.id) {
-    return response.status(401).json({ error: 'Token is invalid' })
-  }
-  const user = await User.findById(tokenDecoded.id)
-  const userId = tokenDecoded.id
+  const user = await verifyUser(request, response)
 
-  if (!user) {
-    return response.status(401).json({ error: 'No user matching token found' })
+  if (user === null) {
+    return response.status(401).end()
   }
-  
+
+  const userId = user.id
+
   if (typeof request.body.title === 'undefined' && typeof request.body.url === 'undefined') {
 
     return response.status(400).end()
@@ -51,9 +75,22 @@ blogsRouter.post('/', async (request, response) => {
 })
 
 blogsRouter.delete('/:id', async (request, response) => {
+  
+  const user = await verifyUser(request, response)
+  if (user === null) {
+    return response.status(401).end()
+  }
+  const userId = user.id
+
   try {
-    await Blog.findByIdAndRemove(request.params.id)
-    response.status(204).end()
+    const blogCheck = await Blog.findById(request.params.id)
+    console.log(blogCheck, userId.toString())
+    if (blogCheck && blogCheck.user.toString() === userId.toString()) {
+      await Blog.findByIdAndRemove(request.params.id)
+      response.status(204).end()
+    } else {
+      response.status(401).json({ error: 'Unauthorized removal or invalid blog id' })
+    }
   } catch (exception) {
     console.log('Find and remove failed for id ' + request.params.id, exception)
   }
