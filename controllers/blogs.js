@@ -1,39 +1,7 @@
 const blogsRouter = require('express').Router()
-const jwt = require('jsonwebtoken')
 
 const Blog = require('../models/blog')
 const User = require('../models/user')
-const config = require('../utils/config')
-
-const verifyUser = async (request, response) => {
-
-  if (!request.token) {
-    response.status(401).json({ error: 'Token is missing' })
-    return null
-  }
-  
-  let tokenDecoded
-  try {
-    tokenDecoded = jwt.verify(request.token, config.SECRET)
-  } catch (exception) {
-    response.status(401).json({ error: 'Token verification failed' })
-    return null
-  }
-  if (!tokenDecoded.id) {
-    response.status(401).json({ error: 'Token is invalid' })
-    return null
-  }
-  
-  const user = await User.findById(tokenDecoded.id)
-
-  if (!user) {
-    response.status(401).json({ error: 'No user matching token found' })
-    return null
-  }
-
-  return user
-  
-}
 
 blogsRouter.get('/', async (request, response) => {
   const blogs = await Blog.find({}).populate('user', { username: 1, name: 1 })
@@ -42,13 +10,13 @@ blogsRouter.get('/', async (request, response) => {
 
 blogsRouter.post('/', async (request, response) => {
   
-  const user = await verifyUser(request, response)
+  const user = request.user
 
   if (user === null) {
-    return response.status(401).end()
+    return response.status(401).json({ error: 'Invalid user' })
   }
 
-  const userId = user.id
+  const userId = user._id
 
   if (typeof request.body.title === 'undefined' && typeof request.body.url === 'undefined') {
 
@@ -76,22 +44,29 @@ blogsRouter.post('/', async (request, response) => {
 
 blogsRouter.delete('/:id', async (request, response) => {
   
-  const user = await verifyUser(request, response)
+  const user = request.user
   if (user === null) {
-    return response.status(401).end()
+    return response.status(401).json({ error: 'Invalid user' })
   }
-  const userId = user.id
+  const userId = user._id
 
   try {
     const blogCheck = await Blog.findById(request.params.id)
-    console.log(blogCheck, userId.toString())
+    
     if (blogCheck && blogCheck.user.toString() === userId.toString()) {
+
       await Blog.findByIdAndRemove(request.params.id)
+      user.blogs.splice(user.blogs.indexOf(request.params.id), 1)
+      await user.save()
+      
       response.status(204).end()
+
     } else {
       response.status(401).json({ error: 'Unauthorized removal or invalid blog id' })
     }
+
   } catch (exception) {
+    response.status(401).json({ error: 'Delete failed ' + exception })
     console.log('Find and remove failed for id ' + request.params.id, exception)
   }
 })
