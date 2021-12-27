@@ -8,7 +8,7 @@ const User = require('../models/user')
 
 beforeEach(async () => {
   await User.deleteMany({})
-  //await User.insertMany(helper.testBlogs)
+  //await User.insertMany(helper.testUsers)
 })
 
 test('fail to create user: short username', async () => {

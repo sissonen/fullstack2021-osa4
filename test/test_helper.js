@@ -7,6 +7,7 @@ const testBlogs = [
     author: "Michael Chan",
     url: "https://reactpatterns.com/",
     likes: 7,
+    user: "61bcaff52edcc8bb2fe047ac",
     __v: 0
   },
   {
@@ -47,8 +48,24 @@ const testBlogs = [
     author: "Robert C. Martin",
     url: "http://blog.cleancoder.com/uncle-bob/2016/05/01/TypeWars.html",
     likes: 2,
+    user: "61bcaff52edcc8bb2fe047ac",
     __v: 0
   }
 ]
 
-module.exports = { testBlogs }
+const testUsers = [
+  {
+    _id: "61bcaff52edcc8bb2fe047ac",
+    username: "tester",
+    name: "Tester Test",
+    passwordHash: "$2b$10$jlkbAR/AEH3Qsa6DTguObO9MRL8VXmLaiW4BrDILMt39L.slqk99a",
+    blogs: [
+      "5a422a851b54a676234d17f7"
+    ],
+    __v: 0
+  }
+]
+
+const testPass = "psdd"
+
+module.exports = { testBlogs, testUsers, testPass }

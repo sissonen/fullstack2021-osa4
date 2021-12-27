@@ -5,10 +5,21 @@ const app = require('../app')
 const api = supertest(app)
 
 const Blog = require('../models/blog')
+const User = require('../models/user')
+
+let token
 
 beforeEach(async () => {
   await Blog.deleteMany({})
+  await User.deleteMany({})
   await Blog.insertMany(helper.testBlogs)
+  await User.insertMany(helper.testUsers)
+  const auth = await api
+    .post('/api/login')
+    .send(
+      { username: helper.testUsers[0].username, password: helper.testPass }
+    )
+  token = auth.body.token
 })
 
 test('blog list', async () => {
@@ -29,6 +40,26 @@ test('id is defined', async () => {
 
 })
 
+test('unauthorized addition', async () => {
+  
+  const testEntry = {
+    author: 'Test 0',
+    title: 'Test 0',
+    url: 'test0.com',
+    likes: 1
+  }
+  
+  await api
+    .post('/api/blogs')
+    .send(testEntry)
+    .expect(401)
+  
+  const response = await api.get('/api/blogs')
+
+  expect(response.body).toHaveLength(helper.testBlogs.length)
+
+})
+
 test('blog addition', async () => {
   
   const testEntry = {
@@ -40,6 +71,7 @@ test('blog addition', async () => {
 
   await api
     .post('/api/blogs')
+    .set('Authorization', 'Bearer ' + token)
     .send(testEntry)
     .expect(201)
 
@@ -62,6 +94,7 @@ test('undefined likes', async () => {
   
   const response = await api
     .post('/api/blogs')
+    .set('Authorization', 'Bearer ' + token)
     .send(testEntry)
     .expect(201)
   
@@ -78,6 +111,7 @@ test('malformed entry', async () => {
   
   await api
     .post('/api/blogs')
+    .set('Authorization', 'Bearer ' + token)
     .send(testEntry)
     .expect(400)
 
@@ -91,6 +125,7 @@ test('delete entry', async () => {
 
   await api
     .delete('/api/blogs/' + idToTest)
+    .set('Authorization', 'Bearer ' + token)
     .expect(204)
   
   const blogsInDbEnd = await api
