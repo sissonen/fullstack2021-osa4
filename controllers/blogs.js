@@ -18,7 +18,7 @@ blogsRouter.post('/', async (request, response) => {
 
   const userId = user._id
 
-  if (typeof request.body.title === 'undefined' && typeof request.body.url === 'undefined') {
+  if ((typeof request.body.title === 'undefined' || !request.body.title) && (typeof request.body.url === 'undefined' || !request.body.url)) {
 
     return response.status(400).end()
 
