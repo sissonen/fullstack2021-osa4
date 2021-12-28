@@ -34,8 +34,7 @@ blogsRouter.post('/', async (request, response) => {
 
     const savedBlog = await blog.save()
 
-    user.blogs = user.blogs.concat(savedBlog._id)
-    await user.save()
+    await User.findOneAndUpdate({id: user.id}, { blogs: user.blogs.concat(savedBlog._id) })
 
     response.status(201).json(savedBlog)
 
@@ -57,7 +56,7 @@ blogsRouter.delete('/:id', async (request, response) => {
 
       await Blog.findByIdAndRemove(request.params.id)
       user.blogs.splice(user.blogs.indexOf(request.params.id), 1)
-      await user.save()
+      await User.findOneAndUpdate({id: user.id}, { blogs: user.blogs })
       
       response.status(204).end()
 
