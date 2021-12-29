@@ -20,7 +20,7 @@ loginRouter.post('/', async (request, response) => {
   }
 
   const userInfo = {
-    usernam: user.username,
+    username: user.username,
     id: user._id
   }
 
