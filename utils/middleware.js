@@ -4,6 +4,7 @@ const config = require('../utils/config')
 
 const userExtractor = async (request, response, next) => {
 
+  console.log(request.token)
   if (!request.token) {
     request.user = null
     next()
@@ -24,7 +25,8 @@ const userExtractor = async (request, response, next) => {
     return
   }
   
-  request.user = await User.findById(tokenDecoded.id)
+  const allusers = await User.find({}).exec()
+  request.user = await User.findById(tokenDecoded.id).exec()
 
   next()
 

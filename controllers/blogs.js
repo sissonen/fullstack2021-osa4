@@ -12,6 +12,7 @@ blogsRouter.post('/', async (request, response) => {
   
   const user = request.user
 
+  console.log(user)
   if (user === null) {
     return response.status(401).json({ error: 'Invalid user' })
   }
@@ -36,7 +37,9 @@ blogsRouter.post('/', async (request, response) => {
 
     await User.findOneAndUpdate({id: user.id}, { blogs: user.blogs.concat(savedBlog._id) })
 
-    response.status(201).json(savedBlog)
+    const populatedBlog = await Blog.populate(savedBlog, { path: 'user', select: [ 'username', 'name' ]})
+
+    response.status(201).json(populatedBlog)
 
   }
 })
@@ -76,7 +79,8 @@ blogsRouter.put('/:id', async (request, response) => {
   
   try {
     const updatedBlog = await Blog.findByIdAndUpdate(request.params.id, blog, { new: true })
-    response.json(updatedBlog)
+    const populatedBlog = await Blog.populate(updatedBlog, { path: 'user', select: [ 'username', 'name' ]})
+    response.json(populatedBlog)
   } catch (exception) {
     console.log('Find and update failed for id ' + request.params.id, exception)
   }
