@@ -4,7 +4,6 @@ const config = require('../utils/config')
 
 const userExtractor = async (request, response, next) => {
 
-  console.log(request.token)
   if (!request.token) {
     request.user = null
     next()

@@ -12,7 +12,6 @@ blogsRouter.post('/', async (request, response) => {
   
   const user = request.user
 
-  console.log(user)
   if (user === null) {
     return response.status(401).json({ error: 'Invalid user' })
   }
